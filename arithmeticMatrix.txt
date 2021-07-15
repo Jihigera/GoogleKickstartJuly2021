@@ -1,0 +1,58 @@
+using namespace std;
+#include <map>
+#include <iostream>
+
+
+int main(){
+    
+    int t = 0;
+    std::cin >> t;
+    
+    
+    for(int i = 0; i < t; i++)
+    {
+        int matrix[3][3];
+        int r = 0;
+        
+        std::cin >> matrix[0][0] >> matrix[0][1] >> matrix[0][2];
+        std::cin >> matrix[1][0] >> matrix[1][2];
+        std::cin >> matrix[2][0] >> matrix[2][1] >> matrix[2][2];
+        
+        std::cout << "Case #" << i + 1<< ": ";
+        
+        auto isOdd = [&](int a){return a %2;};
+        auto isConsec = [&](int a , int b, int c){return a + c == b*2;};
+        
+        if(isConsec(matrix[0][0], matrix[0][1], matrix[0][2]))
+            r++;
+        if(isConsec(matrix[0][0], matrix[1][0], matrix[2][0]))
+            r++;
+        if(isConsec(matrix[0][2], matrix[1][2], matrix[2][2]))
+            r++;
+        if(isConsec(matrix[2][0], matrix[2][1], matrix[2][2]))
+            r++;    
+        
+        map<int,int> m;
+        
+        auto update = [&](int sum){
+            if(!isOdd(sum))
+                m[sum]++;
+        };
+        update(matrix[0][0] + matrix[2][2]);
+        update(matrix[0][1] + matrix[2][1]);
+        update(matrix[0][2] + matrix[2][0]);
+        update(matrix[1][0] + matrix[1][2]);
+        
+        int max = 0;
+        for(auto num : m)
+        {
+            if(max < num.second)
+                max = num.second;
+        }
+        r += max;
+        
+        std::cout << r << endl;
+    }
+    
+    return 0;
+}
