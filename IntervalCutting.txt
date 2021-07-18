@@ -1,0 +1,60 @@
+using namespace std;
+#include <iostream>
+#define ll long long
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <utility>
+
+int main(){
+    
+    int t;
+    ll c, n, l, r;
+    
+    cin >> t;
+    for(int i = 0; i < t; i++)
+    {
+        vector<std::pair<ll,bool>> endpts;
+        cin >> n >>c;
+        map<ll, ll, std::greater<ll>> cuts;
+        ll total = n;
+        for(ll j = 0; j < n; j++)
+        {
+            cin >> l >> r;
+
+            if(r-l > 1)
+            {
+                endpts.push_back(make_pair(l+1,true));
+                endpts.push_back(make_pair(r,false));
+            }
+        }
+        sort(endpts.begin(), endpts.end());
+        ll numOfIntervals = 0;
+
+        for(ll j = 0; j < endpts.size()-1; j++)
+        {
+            ll currentRange = endpts[j+1].first - endpts[j].first;
+            if(endpts[j].second)
+                numOfIntervals++;
+            else
+                numOfIntervals--;
+                
+            if(numOfIntervals > 0)
+                cuts[numOfIntervals] += currentRange;
+        }
+        for(const auto& [numOfIntervals, amtOfCuts] : cuts)
+        {
+            //cout << numOfIntervals << " " <<amtOfCuts << endl;
+            if(c < 1)
+                break;
+            if(c > amtOfCuts)
+                total += (amtOfCuts * numOfIntervals);
+            else
+                total += (c * numOfIntervals);
+            c -= amtOfCuts;
+            //cout << c << endl;
+        }
+        cout << "Case #" << i+1 << ": " << total << endl;
+    }
+    return 0;
+};
