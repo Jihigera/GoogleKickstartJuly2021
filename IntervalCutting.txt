@@ -17,13 +17,19 @@ int main(){
         vector<std::pair<ll,bool>> endpts;
         cin >> n >>c;
         map<ll, ll, std::greater<ll>> cuts;
-        ll total = n;
+        ll total = n; //stores the initial number of intervals given to us.
+
         for(ll j = 0; j < n; j++)
         {
             cin >> l >> r;
 
-            if(r-l > 1)
+            if(r-l > 1) //if the interval isn't possible to cut don't add it to the rest of the
+			//the intervals we are going to work with.
             {
+		//pushes all endpoints with a true tag for start points and false for ends.
+		//adding one here because cutting at the start point won't make a new interval
+		//so this checks one integer after the start which is the first possible cut for 
+		//any interval.
                 endpts.push_back(make_pair(l+1,true));
                 endpts.push_back(make_pair(r,false));
             }
@@ -33,28 +39,71 @@ int main(){
 
         for(ll j = 0; j < endpts.size()-1; j++)
         {
+	//finds the range between the upcoming endpoint and this one.
+	//which represents how many places are possible to cut within the current number of intervals.
             ll currentRange = endpts[j+1].first - endpts[j].first;
+
+	//Updating the current number of intervals that we are inside of. +1 if we are at a start
+ 	//point. -1 if we are at an end point.
             if(endpts[j].second)
                 numOfIntervals++;
             else
                 numOfIntervals--;
-                
+         //if we aren't in any interval, don't add a 0 key to the map since cutting here will
+	//be useless, otherwise do add however many cuts we can make within these intervals to
+	//the map key at this number of intervals.
             if(numOfIntervals > 0)
                 cuts[numOfIntervals] += currentRange;
         }
         for(const auto& [numOfIntervals, amtOfCuts] : cuts)
         {
-            //cout << numOfIntervals << " " <<amtOfCuts << endl;
+	//if no more cuts are allowed break.
             if(c < 1)
                 break;
+	//the amount of intervals we add is equal to the amount of intervals we are inside of 
+	//when we make a cut, therefore multiply however many cuts we can make at the current
+	//key in the map which represents the amount of intervals we are in by that amount of 
+	//intervals and add it to the total. continue until out of allowed or possible cuts.
             if(c > amtOfCuts)
                 total += (amtOfCuts * numOfIntervals);
             else
                 total += (c * numOfIntervals);
             c -= amtOfCuts;
-            //cout << c << endl;
         }
         cout << "Case #" << i+1 << ": " << total << endl;
     }
     return 0;
 };
+
+/* Explanation of thought process:
+When cutting an interval, each interval will always provide exactly one more interval, essentially
+adding to the total number of intervals by double the amount of intervals you cut with a single cut.
+That said, there is no real need to worry about where within any interval to cut since anywhere
+will produce the same outcome and it won't change any future outcomes since you can't make a piece
+of an interval be inside some other interval just by cutting it in some way. With that in mind
+I focused on the end points of the intervals. If you were to put the intervals on a number line
+you could see clearly that the number of intervals that will be cut by any given number only 
+changes at the end points of each interval. If you go from left to right down the number line,
+then if the next end point on the number line is the start of an interval, once you pass that 
+end point you will be "inside" of that interval and each time you pass a starting endpoint you will
+be entering a new interval meaning if you were to make a cut there you will cut through and make
+exactly one more interval. Similarly if the next end point is the end of an interval then you 
+will be inside one less interval and will make one less cut which will make one less interval. The
+next thing to figure out is exactly how many possible cuts are possible between each end point and
+for that all we do is take the range from this interval to the next interval.
+Therefore, I chose to take all of the end points, mark them with a boolean as start or end intervals
+then sort them from smallest to largest in order to gaurantee that the first number will be a start
+point and that ranges will be possible to calculate. 
+Then I iterated through them, adding one to a counter of intervals that will be cut
+when a start end point is reached and subtracting one when an endpoint is reached. From there I 
+calculated the range that the current number of intervals would last for and added the range to
+the integer mapped to the amount of intervals to be cut. The reason for this, is since we don't
+care where the cuts are being made, all we care about is the number of intervals we can cut with
+one cut and how many places we can do that. The map's key is the number of intervals to be made 
+with a single cut and the value is the number of places a cut like that can be made throughout
+all of the intervals regardless of where. Finally, I iterate through the map in descending order
+taking the number of possible positions to cut at a given amount of intervals, multiplying them 
+together and adding them to the total number of intervals. Then subtracting the number of cuts 
+made by the total amount of cuts allows and repeating until there are no more cuts allowed and/or
+no more possible cuts to make.
+*/
