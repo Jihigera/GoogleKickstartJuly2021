@@ -1,0 +1,101 @@
+using namespace std;
+#include <map>
+#include <iostream>
+#include <algorithm>
+
+int main(){
+    int t; 
+    std::cin >> t;
+        for(int z = 0; z < t; z++)
+        {
+            cout << "Case #" << z + 1 <<": ";
+            std::map<long long, long long> prob;
+            int n, m;
+            std::cin >> n >> m;	
+	//populating the map with all intervals.
+            for(int c = 0; c < n; c++)
+            {
+                long long a, b;
+                std::cin >> a >> b;
+                prob[a] = b;
+            }
+            for( int c = 0; c < m; c++)
+            {
+                long long s;
+                
+                cin >> s;
+                std::map<long long, long long>::iterator i, prev;
+	  //getting interator to upper bound
+                i = prob.upper_bound(s);
+                prev = i;
+	  //Checks if student is smaller than any interval
+                if(i == prob.begin())
+                {
+	//print key of first interval and increment it or delete it all together if it is the last number in the interval.
+                    std::cout << i->first;
+                    if(i->first + 1 <= i->second)
+                    {
+                        auto h = prob.extract(i->first);
+                        if(!h.empty())
+                        {
+                            h.key()++;
+                            prob.insert(std::move(h));
+                        }
+                    }
+                    else
+                        prob.erase(i);
+                }
+                else
+                {
+                    prev--;  //decrement iterator to get the iterator just before this number's upperbound.
+		//Checks if number is within an interval
+                    if(s < prev->second)
+                    {
+                        std::cout << s;
+                        if(s == prev->first)
+                        {
+                            auto h = prob.extract(prev->first);
+                            if(!h.empty())
+                            {
+                                h.key()++;
+                                prob.insert(std::move(h));
+                            }
+                        }
+                        else
+                        {
+                            prob[s+1] = prev->second;
+                            prev->second = s-1;
+                        }
+                    }
+		//checks if number is between two intervals and closer to the lesser interval
+		 or number is after all intervals
+                    else if(i == prob.end() || (i->first - s >= s - prev->second))
+                    {
+                        std::cout << prev->second;
+                        if(prev->second == prev->first)
+                            prob.erase(prev);
+                        else
+                            prev->second--;
+                    }
+		//Number must be inbetween intervals but closer to the larger interval then.
+                    else
+                    {
+                        std::cout << i->first;
+                        if(i->first == i->second)
+                            prob.erase(i);
+                        else
+                        {
+                            auto h = prob.extract(i->first);
+                            if(!h.empty())
+                            {
+                                h.key()++;
+                                prob.insert(std::move(h));
+                            }
+                        }
+                    }
+                }
+                cout << ' ';
+            }
+            cout << '\n';
+        }
+    return 0;}
